@@ -10,6 +10,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
 
+import com.agrestesoluciona.backend.dto.LoginRequest;
+
 @Service
 public class UserService {
 
@@ -20,6 +22,8 @@ public class UserService {
     private BCryptPasswordEncoder passwordEncoder;
 
     public User saveUser(User user) {
+
+        user.setEmail(normalizeEmail(user.getEmail()));
 
         Optional<User> userExists = userRepository.findByEmail(user.getEmail());
 
@@ -34,5 +38,33 @@ public class UserService {
         user.setPassword(encryptedPassword);
 
         return userRepository.save(user);
+    }
+
+    public User login(LoginRequest loginRequest) {
+
+        String email = normalizeEmail(loginRequest.getEmail());
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException(
+                        "Email ou senha inválidos"));
+
+        boolean passwordMatches = passwordEncoder.matches(
+                loginRequest.getPassword(),
+                user.getPassword()
+        );
+
+        if (!passwordMatches) {
+            throw new RuntimeException(
+                    "Email ou senha inválidos");
+        }
+
+        return user;
+    }
+
+    private String normalizeEmail(String email) {
+
+        return email == null
+                ? null
+                : email.trim().toLowerCase();
     }
 }

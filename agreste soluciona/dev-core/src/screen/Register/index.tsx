@@ -20,9 +20,15 @@ import { useState } from 'react';
 import styles from './styles';
 /* IMPORTAR CARREGAMENTO */
 import { ActivityIndicator, } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { registerUser } from '../../services/api';
 
 
 export default function RegisterScreen() {
+
+    const navigation = useNavigation();
 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -103,10 +109,16 @@ export default function RegisterScreen() {
 
             try {
 
-                /* SIMULAR REQUISIÇÃO */
+                const user = await registerUser({
+                    name,
+                    email,
+                    phone,
+                    password,
+                });
 
-                await new Promise(resolve =>
-                    setTimeout(resolve, 2000)
+                await AsyncStorage.setItem(
+                    '@agreste:user',
+                    JSON.stringify(user)
                 );
 
                 Alert.alert(
@@ -114,18 +126,15 @@ export default function RegisterScreen() {
                     'Conta criada com sucesso!'
                 );
 
-                console.log({
-                    name,
-                    email,
-                    phone,
-                    password,
-                });
+                navigation.navigate('Home' as never);
 
             } catch (error) {
 
                 Alert.alert(
                     'Erro',
-                    'Não foi possível cadastrar'
+                    error instanceof Error
+                        ? error.message
+                        : 'Não foi possível cadastrar'
                 );
 
             } finally {

@@ -32,27 +32,42 @@ Queremos simplificar o processo de encontrar pessoas qualificadas para serviços
 
 ## 🛠️ Tecnologias Utilizadas
 
-*(Exemplo – edite conforme seu projeto usa)*
-
-- **Frontend:** React / Next.js / TypeScript  
-- **Backend:** Node.js / Express  
-- **Banco de Dados:** MongoDB ou MySQL  
-- **Estilização:** Tailwind CSS  
-- **Controle de versão:** Git & GitHub  
+- **Frontend:** Expo / React Native / TypeScript
+- **Backend:** Java / Spring Boot
+- **Banco de Dados:** H2 local por padrão, com suporte a MySQL via variáveis de ambiente
+- **Controle de versão:** Git & GitHub
 
 ---
 
 ## 📦 Como Executar o Projeto
 
-```bash
-# Clone este repositório
-git clone https://github.com/Seu-Usuario/dev-core
+### Backend
 
-# Acesse a pasta do projeto
-cd dev-core
+```powershell
+cd "c:\Users\cezar\Desktop\DEV-CORE-2-main\agreste soluciona\backend"
+.\mvnw.cmd spring-boot:run
+```
 
-# Instale as dependências
+O backend sobe em `http://localhost:8080`.
+
+Endpoints principais:
+
+- `POST /users` para cadastrar usuário
+- `POST /users/login` para fazer login
+
+### Frontend
+
+```powershell
+cd "c:\Users\cezar\Desktop\DEV-CORE-2-main\agreste soluciona\dev-core"
 npm install
+npm run web
+```
 
-# Execute o servidor de desenvolvimentoo
-npm run dev
+Por padrão, o app chama `http://localhost:8080` no navegador, `http://10.0.2.2:8080` no emulador Android e `http://localhost:8080` no iOS.
+
+Se for testar no celular físico, use o IP da sua máquina:
+
+```powershell
+$env:EXPO_PUBLIC_API_URL="http://SEU-IP-LOCAL:8080"
+npm start
+```

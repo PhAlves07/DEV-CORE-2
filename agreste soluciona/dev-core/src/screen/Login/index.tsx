@@ -22,6 +22,9 @@ import styles from './styles';
 import { ActivityIndicator, } from 'react-native';
 /* IMPORTAR NAVEGAÇÃO ROTAS */
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { loginUser } from '../../services/api';
 
 
 export default function LoginScreen() {
@@ -73,10 +76,14 @@ export default function LoginScreen() {
 
             try {
 
-                /* SIMULAR REQUISIÇÃO */
+                const user = await loginUser({
+                    email,
+                    password,
+                });
 
-                await new Promise(resolve =>
-                    setTimeout(resolve, 2000)
+                await AsyncStorage.setItem(
+                    '@agreste:user',
+                    JSON.stringify(user)
                 );
 
                 Alert.alert(
@@ -84,16 +91,15 @@ export default function LoginScreen() {
                     'Login feito com sucesso!'
                 );
 
-                console.log({
-                    email,
-                    password,
-                });
+                navigation.navigate('Home' as never);
 
             } catch (error) {
 
                 Alert.alert(
                     'Erro',
-                    'Não foi possível cadastrar'
+                    error instanceof Error
+                        ? error.message
+                        : 'Não foi possível fazer login'
                 );
 
             } finally {

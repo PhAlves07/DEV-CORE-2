@@ -1,4 +1,4 @@
-package com.agestesoluciona.backend;
+package com.agrestesoluciona.backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
