@@ -5,17 +5,112 @@ import {
     TextInput,
     ScrollView,
     TouchableOpacity,
+    Modal,
 } from 'react-native';
+/* IMPORTAR NAVEGACAO */
 import { useNavigation } from '@react-navigation/native';
-
-import { Ionicons } from '@expo/vector-icons';
-
+/* IMPORTAR ICONES */
+import { Feather, Ionicons } from '@expo/vector-icons';
+/* IMPORTAR CSS */
 import styles from './styles';
-
+/* IMPORTAR CARROSSEL */
 import ServiceCard from '../../components/ServiceCard';
+/* IMPORTAR ASYNC */
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect } from 'react';
+/* IMPORTAR USESTATE */
+import { useState } from 'react';
+/* IMPORTAR ICONES LUCIDE */
+import {
+    Zap,
+    Wrench,
+    Paintbrush,
+    Key,
+    Hammer,
+    Ellipsis,
+} from 'lucide-react-native';
 
-export default function HomeScreen() {
-    const navigation = useNavigation();
+export default function HomeScreen({ navigation }: any) {
+
+    const [user, setUser] = useState<any>(null);
+    const [userName, setUserName] = useState('');
+    const [menuVisible, setMenuVisible] = useState(false);
+
+    const [userData, setUserData] = useState<any>(null);
+
+
+    const handleProfile = async () => {
+
+        const user = await AsyncStorage.getItem('@user');
+
+        if (user) {
+            navigation.navigate('Profile', {
+                user: JSON.parse(user),
+            });
+        }
+    };
+
+
+
+    useEffect(() => {
+        loadUser();
+    }, []);
+
+    const loadUser = async () => {
+
+        const userData = await AsyncStorage.getItem('@user');
+
+
+
+        if (userData) {
+
+            const user = JSON.parse(userData);
+
+            setUser(user);
+            setUserName(user.name);
+
+        }
+
+    };
+    const handleLogout = async () => {
+
+        await AsyncStorage.removeItem('@user');
+
+        navigation.navigate('Login' as never);
+
+    };
+    const categories = [
+        {
+            id: 1,
+            name: 'Eletricista',
+            icon: Zap,
+        },
+        {
+            id: 2,
+            name: 'Encanador',
+            icon: Wrench,
+        },
+        {
+            id: 3,
+            name: 'Pintor',
+            icon: Paintbrush,
+        },
+        {
+            id: 4,
+            name: 'Chaveiro',
+            icon: Key,
+        },
+        {
+            id: 5,
+            name: 'Marceneiro',
+            icon: Hammer,
+        },
+        {
+            id: 6,
+            name: 'Outros',
+            icon: Ellipsis,
+        },
+    ];
     return (
 
         <ScrollView style={styles.container}>
@@ -27,21 +122,35 @@ export default function HomeScreen() {
 
                 <View style={styles.headerRight}>
                     <TouchableOpacity
-                        onPress={() => navigation.navigate('Login' as never)}
+                        onPress={handleProfile}
                     >
-                        <Ionicons
-                            name="person"
+                        <Feather
+                            name="user"
                             size={22}
                             color="#000"
                         />
                     </TouchableOpacity>
 
-                    <Ionicons
-                        name="menu"
-                        size={28}
-                        color="#000" />
+                    <TouchableOpacity
+                        onPress={() => setMenuVisible(true)}
+                    >
+                        <Feather
+                            name="menu"
+                            size={32}
+                            color="#000"
+                        />
+                    </TouchableOpacity>
                 </View>
             </View>
+            <Text style={styles.greeting}>
+
+                {
+                    userName
+                        ? `Olá, ${userName} 👋`
+                        : 'Olá 👋'
+                }
+
+            </Text>
 
             {/* TEXTO */}
             <Text style={styles.description}>
@@ -71,30 +180,122 @@ export default function HomeScreen() {
             <Text style={styles.sectionTitle}>
                 Top Serviços requisitados
             </Text>
-            <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.cardsContainer}
+            <View style={styles.categoriesContainer}>
+                {categories.map((item) => {
+                    const Icon = item.icon;
+
+                    return (
+                        <TouchableOpacity key={item.id} style={styles.card}>
+                            <Icon size={38} color="#F28C38" />
+
+                            <Text style={styles.cardText}>
+                                {item.name}
+                            </Text>
+                        </TouchableOpacity>
+                    );
+                })}
+            </View>
+            <Modal
+                visible={menuVisible}
+                animationType="slide"
+                transparent={true}
             >
-                <ServiceCard
 
-                    image={require('../../assets/services/1.png')} />
+                <View style={styles.modalOverlay}>
 
-                <ServiceCard
+                    <View style={styles.menuContainer}>
 
-                    image={require('../../assets/services/2.png')} />
+                        <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={() => setMenuVisible(false)}
+                        >
 
-                <ServiceCard
+                            <Feather
+                                name="x"
+                                size={28}
+                                color="#000"
+                            />
 
-                    image={require('../../assets/services/3.png')} />
+                        </TouchableOpacity>
 
-                <ServiceCard
+                        <Text style={styles.menuTitle}>
+                            Menu
+                        </Text>
 
-                    image={require('../../assets/services/4.png')} />
-                <ServiceCard
+                        {
+                            user ? (
 
-                    image={require('../../assets/services/5.png')} />
-            </ScrollView>
+                                <TouchableOpacity
+                                    style={styles.menuItem}
+                                    onPress={handleLogout}
+                                >
+
+                                    <Feather
+                                        name="log-out"
+                                        size={22}
+                                        color="red"
+                                    />
+
+                                    <Text style={styles.logoutText}>
+                                        Logout
+                                    </Text>
+
+                                </TouchableOpacity>
+
+                            ) : (
+
+                                <>
+
+                                    <TouchableOpacity
+                                        style={styles.menuItem}
+                                        onPress={() => {
+                                            setMenuVisible(false);
+                                            navigation.navigate('Login' as never);
+                                        }}
+                                    >
+
+                                        <Feather
+                                            name="log-in"
+                                            size={22}
+                                            color="#000"
+                                        />
+
+                                        <Text style={styles.menuText}>
+                                            Entrar
+                                        </Text>
+
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        style={styles.menuItem}
+                                        onPress={() => {
+                                            setMenuVisible(false);
+                                            navigation.navigate('Register' as never);
+                                        }}
+                                    >
+
+                                        <Feather
+                                            name="user-plus"
+                                            size={22}
+                                            color="#000"
+                                        />
+
+                                        <Text style={styles.menuText}>
+                                            Cadastrar
+                                        </Text>
+
+                                    </TouchableOpacity>
+
+                                </>
+
+                            )
+                        }
+
+                    </View>
+
+                </View>
+
+            </Modal>
         </ScrollView>
 
     );

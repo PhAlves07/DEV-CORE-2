@@ -2,6 +2,19 @@ import { StyleSheet } from 'react-native';
 import { blue } from 'react-native-reanimated/lib/typescript/Colors';
 
 const styles = StyleSheet.create({
+
+    buttonBack: {
+        width: 50,
+        height:50,
+
+        backgroundColor: '#F2F2F2',
+
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 5,
+        marginTop: 10,
+
+    },
     logo: {
         width: 140,
         height: 140,
@@ -22,6 +35,7 @@ const styles = StyleSheet.create({
 
         fontSize: 13,
     },
+
 
     /* CONTAINER PRINCIPAL */
 
@@ -104,7 +118,7 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
 
-     /* BOTÃO CADASTRO */
+    /* BOTÃO CADASTRO */
 
     registerContainer: {
 

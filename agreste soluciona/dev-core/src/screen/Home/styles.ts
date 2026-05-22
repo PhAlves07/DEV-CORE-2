@@ -44,10 +44,25 @@ const styles = StyleSheet.create({
     gap: 18,
   },
 
+  /* TITULO */
+  greeting: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#000',
+    marginTop: 25,
+  },
+
+  subtitle: {
+    fontSize: 18,
+    color: '#666',
+    marginTop: 5,
+    marginBottom: 25,
+  },
+
   /* TEXTO */
 
   description: {
-    marginTop: 70,
+    marginTop: 50,
 
     fontSize: 16,
     lineHeight: 24,
@@ -60,7 +75,7 @@ const styles = StyleSheet.create({
   /* PESQUISA */
 
   searchContainer: {
-    marginTop: 24,
+    marginTop: 15,
 
     width: '100%',
     height: 52,
@@ -121,7 +136,7 @@ const styles = StyleSheet.create({
   /* TÍTULO */
 
   sectionTitle: {
-    marginTop: 80,
+    marginTop: 35,
     marginBottom: 20,
 
     fontSize: 22,
@@ -130,40 +145,86 @@ const styles = StyleSheet.create({
     color: '#111',
   },
 
-  /* CARDS */
-
-  cardsContainer: {
-    paddingBottom: 30,
+  /* ICONES */
+  categoriesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginTop: 10,
   },
 
-  serviceCard: {
-    width: 140,
-    height: 200,
+  card: {
+    width: '30%',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    paddingVertical: 25,
+    alignItems: 'center',
+    marginBottom: 15,
 
-    backgroundColor: '#FFFFFF',
-
-    borderRadius: 18,
-
-    marginRight: 14,
-
-    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
 
     elevation: 3,
   },
 
-  serviceImage: {
-    width: '100%',
-    height: 120,
-  },
-
-  serviceTitle: {
+  cardText: {
+    marginTop: 12,
     fontSize: 14,
     fontWeight: '600',
+    color: '#333',
+  },
 
-    color: '#222',
 
-    padding: 10,
+   /* MENU HAMBURGUER */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+  },
+
+  menuContainer: {
+    width: '75%',
+    height: '100%',
+    backgroundColor: '#fff',
+    padding: 25,
+    borderTopLeftRadius: 25,
+    borderBottomLeftRadius: 25,
+  },
+
+  closeButton: {
+    alignSelf: 'flex-end',
+  },
+
+  menuTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginTop: 10,
+    marginBottom: 30,
+  },
+
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 25,
+  },
+
+  menuText: {
+    fontSize: 18,
+    marginLeft: 12,
+  },
+
+  logoutText: {
+    fontSize: 18,
+    marginLeft: 12,
+    color: 'red',
   },
 });
+
 
 export default styles;

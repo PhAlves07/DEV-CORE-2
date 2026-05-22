@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 
 /* IMPORTAR ICONES */
-import { Ionicons } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 /* IMPORTAR USESTATE */
 import { useState } from 'react';
 /* IMPORTAR CSS */
@@ -22,6 +22,10 @@ import styles from './styles';
 import { ActivityIndicator, } from 'react-native';
 /* IMPORTAR NAVEGAÇÃO ROTAS */
 import { useNavigation } from '@react-navigation/native';
+/* IMPORTAR API */
+import api from '../../services/api';
+/* IMPORTAR ASYNC */
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function LoginScreen() {
@@ -34,75 +38,45 @@ export default function LoginScreen() {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    async function handleLogin() {
+    const handleLogin = async () => {
 
-        let valid = true;
+        try {
 
-
-        setEmailError('');
-
-        setPasswordError('');
-
-
-
-        /* VALIDAR EMAIL */
-
-        const emailRegex =
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        if (!emailRegex.test(email)) {
-            setEmailError('E-mail inválido');
-            valid = false;
-        }
-
-
-        /* VALIDAR SENHA */
-
-        if (password.length < 6) {
-            setPasswordError(
-                'Senha deve ter no mínimo 6 caracteres'
-            );
-
-            valid = false;
-        }
-
-        /* SUCESSO */
-        if (valid) {
-
-            setLoading(true);
-
-            try {
-
-                /* SIMULAR REQUISIÇÃO */
-
-                await new Promise(resolve =>
-                    setTimeout(resolve, 2000)
-                );
-
-                Alert.alert(
-                    'Sucesso',
-                    'Login feito com sucesso!'
-                );
-
-                console.log({
+            const response = await api.post(
+                '/users/login',
+                {
                     email,
                     password,
-                });
+                }
+            );
 
-            } catch (error) {
+            console.log(response.data);
 
-                Alert.alert(
-                    'Erro',
-                    'Não foi possível cadastrar'
-                );
+            await AsyncStorage.setItem(
+                '@user',
+                JSON.stringify(response.data)
 
-            } finally {
+            );
+            Alert.alert(
+                'Sucesso',
+                'Login realizado'
+            );
 
-                setLoading(false);
+            navigation.navigate('Home' as never);
 
-            }
+        } catch (error: any) {
+
+            console.log(error);
+        
+
+            Alert.alert(
+                'Erro',
+                error.response?.data || 'Erro no login'
+            );
+
         }
-    }
+
+    };
     return (
         <KeyboardAvoidingView
             style={{ flex: 1 }}
@@ -117,12 +91,24 @@ export default function LoginScreen() {
                     contentContainerStyle={styles.container}
                     showsVerticalScrollIndicator={false}
                 >
-
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('Home' as never)}
+                        style={[
+                             styles.buttonBack
+                        ]}
+                    >
+                        <Ionicons
+                            name="arrow-back"
+                            size={22}
+                            color="#000"
+                        />
+                    </TouchableOpacity>
                     <View>
                         <Image
                             source={require('../../assets/logo.png')}
                             style={styles.logo} />
                     </View>
+
                     {/* TÍTULO */}
                     <Text style={styles.title}>
                         Login
@@ -219,7 +205,7 @@ export default function LoginScreen() {
                             )
                         }
                     </TouchableOpacity>
-
+                    {/* BOTÃO CADASTRO */}
                     <View style={styles.registerContainer}>
 
                         <Text style={styles.registerText}>

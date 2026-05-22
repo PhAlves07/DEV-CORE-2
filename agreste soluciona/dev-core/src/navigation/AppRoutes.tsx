@@ -4,6 +4,8 @@ import SplashScreen from '../screen/Splash';
 import HomeScreen from '../screen/Home';
 import RegisterScreen from '../screen/Register';
 import LoginScreen from '../screen/Login';
+import ProfileScreen from '../screen/Profile';
+import ProviderScreen from '../screen/Provider';
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +31,14 @@ export default function AppRoutes() {
       <Stack.Screen
         name="Login"
         component={LoginScreen}
+      />
+      <Stack.Screen
+        name="Profile"
+        component={ProfileScreen}
+      />
+            <Stack.Screen
+        name="Provider"
+        component={ProviderScreen}
       />
     </Stack.Navigator>
   );

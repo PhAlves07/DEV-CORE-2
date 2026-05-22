@@ -20,10 +20,15 @@ import { useState } from 'react';
 import styles from './styles';
 /* IMPORTAR CARREGAMENTO */
 import { ActivityIndicator, } from 'react-native';
+/* IMPORTAR API */
+import api from '../../services/api';
+/* IMPORTAR NAVEGAÇÃO ROTAS */
+import { useNavigation } from '@react-navigation/native';
 
 
 export default function RegisterScreen() {
 
+    const navigation = useNavigation();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
@@ -33,108 +38,43 @@ export default function RegisterScreen() {
     const [emailError, setEmailError] = useState('');
     const [phoneError, setPhoneError] = useState('');
     const [passwordError, setPasswordError] = useState('');
-    const [confirmPasswordError, setConfirmPasswordError] = useState('');
+
+
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [loading, setLoading] = useState(false);
-
-    async function handleRegister() {
-
-        let valid = true;
-
-        setNameError('');
-        setEmailError('');
-        setPhoneError('');
-        setPasswordError('');
-        setConfirmPasswordError('');
 
 
+    const handleRegister = async () => {
 
-        /* VALIDAR NOME */
+        try {
 
-        if (name.trim().length < 3) {
-            setNameError('Nome muito curto');
-            valid = false;
-        }
-
-        /* VALIDAR EMAIL */
-
-        const emailRegex =
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        if (!emailRegex.test(email)) {
-            setEmailError('E-mail inválido');
-            valid = false;
-        }
-
-        /* VALIDAR TELEFONE */
-        const phoneNumbers =
-            phone.replace(/\D/g, '');
-
-        if (phoneNumbers.length < 11) {
-            setPhoneError('Telefone inválido');
-            valid = false;
-        }
-
-        /* VALIDAR SENHA */
-
-        if (password.length < 6) {
-            setPasswordError(
-                'Senha deve ter no mínimo 6 caracteres'
-            );
-
-            valid = false;
-        }
-
-        /* CONFIRMAR SENHA */
-
-        if (password !== confirmPassword) {
-            setConfirmPasswordError(
-                'As senhas não coincidem'
-            );
-
-            valid = false;
-        }
-
-        /* SUCESSO */
-        if (valid) {
-
-            setLoading(true);
-
-            try {
-
-                /* SIMULAR REQUISIÇÃO */
-
-                await new Promise(resolve =>
-                    setTimeout(resolve, 2000)
-                );
-
-                Alert.alert(
-                    'Sucesso',
-                    'Conta criada com sucesso!'
-                );
-
-                console.log({
+            const response = await api.post(
+                '/users/register',
+                {
                     name,
                     email,
                     phone,
                     password,
-                });
+                }
+            );
 
-            } catch (error) {
+            Alert.alert(
+                'Sucesso',
+                response.data
+            );
 
-                Alert.alert(
-                    'Erro',
-                    'Não foi possível cadastrar'
-                );
+        } catch (error: any) {
 
-            } finally {
+            console.log(error);
 
-                setLoading(false);
+            Alert.alert(
+                'Erro',
+                error.response?.data || 'Erro ao cadastrar'
+            );
 
-            }
         }
-    }
+
+    };
     function formatPhone(value: string) {
 
         /* REMOVE TUDO QUE NÃO FOR NÚMERO */
@@ -175,6 +115,18 @@ export default function RegisterScreen() {
                     contentContainerStyle={styles.container}
                     showsVerticalScrollIndicator={false}
                 >
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('Home' as never)}
+                        style={[
+                             styles.buttonBack
+                        ]}
+                    >
+                        <Ionicons
+                            name="arrow-back"
+                            size={22}
+                            color="#000"
+                        />
+                    </TouchableOpacity>
 
                     <View>
                         <Image
@@ -310,42 +262,21 @@ export default function RegisterScreen() {
                         </TouchableOpacity>
 
                     </View>
-                    {confirmPasswordError ? (
-                        <Text style={styles.errorText}>
-                            {confirmPasswordError}
-                        </Text>
-                    ) : null}
+
 
                     {/* BOTÃO */}
                     <TouchableOpacity
-                        
-                        onPress={handleRegister}
 
-                        disabled={loading}
+                        onPress={handleRegister}
 
                         style={[
                             styles.button,
-
-                            loading && {
-                                opacity: 0.7,
-                            },
                         ]}
                     >
-                        {
-                            loading ? (
-
-                                <ActivityIndicator
-                                    color="#FFF"
-                                />
-
-                            ) : (
 
                                 <Text style={styles.buttonText}>
                                     Criar conta
                                 </Text>
-
-                            )
-                        }
                     </TouchableOpacity>
                 </ScrollView>
 

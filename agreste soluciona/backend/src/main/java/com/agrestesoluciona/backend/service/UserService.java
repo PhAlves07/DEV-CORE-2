@@ -35,4 +35,25 @@ public class UserService {
 
         return userRepository.save(user);
     }
+
+    public User login(String email, String password) {
+
+        Optional<User> userExists = userRepository.findByEmail(email);
+
+        if (userExists.isEmpty()) {
+            throw new RuntimeException("Usuário não encontrado");
+        }
+
+        User user = userExists.get();
+
+        boolean passwordMatch = passwordEncoder.matches(
+                password,
+                user.getPassword());
+
+        if (!passwordMatch) {
+            throw new RuntimeException("Senha incorreta");
+        }
+
+        return user;
+    }
 }
