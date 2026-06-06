@@ -6,6 +6,7 @@ import RegisterScreen from '../screen/Register';
 import LoginScreen from '../screen/Login';
 import ProfileScreen from '../screen/Profile';
 import ProviderScreen from '../screen/Provider';
+import ProvidersFeed from '../screen/ProvidersFeed';
 
 const Stack = createNativeStackNavigator();
 
@@ -39,6 +40,10 @@ export default function AppRoutes() {
             <Stack.Screen
         name="Provider"
         component={ProviderScreen}
+      />
+                  <Stack.Screen
+        name="ProvidersFeed"
+        component={ProvidersFeed}
       />
     </Stack.Navigator>
   );

@@ -170,7 +170,11 @@ export default function HomeScreen({ navigation }: any) {
             </View>
 
             {/* BOTÃO */}
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button}
+                onPress={() => {
+                    navigation.navigate('ProvidersFeed' as never);
+                }}
+            >
                 <Text style={styles.buttonText}>
                     Contratar
                 </Text>
