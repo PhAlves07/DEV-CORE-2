@@ -11,6 +11,9 @@ import com.agrestesoluciona.backend.repository.UserRepository;
 
 import java.util.List;
 
+import com.agrestesoluciona.backend.dto.ProviderResponseDTO;
+import com.agrestesoluciona.backend.dto.ProviderDetailsDTO;
+
 @Service
 public class ProviderService {
 
@@ -60,6 +63,36 @@ public class ProviderService {
         provider.setApproved(true);
 
         return providerRepository.save(provider);
-    }   
+    }
+
+    public List<ProviderResponseDTO> findApprovedDTO() {
+
+        return providerRepository.findByApprovedTrue()
+                .stream()
+                .map(provider -> new ProviderResponseDTO(
+                        provider.getId(),
+                        provider.getUser().getName(),
+                        provider.getProfession(),
+                        provider.getCity(),
+                        provider.getExperienceYears(),
+                        provider.getAvailability()))
+                .toList();
+    }
+
+    public ProviderDetailsDTO findDetails(Long id) {
+
+        Provider provider = providerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Prestador não encontrado"));
+
+        return new ProviderDetailsDTO(
+                provider.getId(),
+                provider.getUser().getName(),
+                provider.getUser().getPhone(),
+                provider.getProfession(),
+                provider.getCity(),
+                provider.getExperienceYears(),
+                provider.getAvailability(),
+                provider.getDescription());
+    }
 
 }

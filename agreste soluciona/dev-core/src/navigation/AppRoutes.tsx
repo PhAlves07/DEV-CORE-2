@@ -45,6 +45,10 @@ export default function AppRoutes() {
         name="ProvidersFeed"
         component={ProvidersFeed}
       />
+                        <Stack.Screen
+        name="ProvidersDetails"
+        component={ProviderDetails}
+      />
     </Stack.Navigator>
   );
 }

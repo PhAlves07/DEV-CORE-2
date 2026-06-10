@@ -6,6 +6,10 @@ import com.agrestesoluciona.backend.service.ProviderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import com.agrestesoluciona.backend.dto.ProviderResponseDTO;
+
+import com.agrestesoluciona.backend.dto.ProviderDetailsDTO;
+
 import java.util.List;
 
 @RestController
@@ -30,16 +34,16 @@ public class ProviderController {
     }
 
     @GetMapping("/approved")
-    public List<Provider> getApprovedProviders() {
+    public List<ProviderResponseDTO> getApprovedProviders() {
 
-        return providerService.findApproved();
+        return providerService.findApprovedDTO();
     }
 
     @GetMapping("/{id}")
-    public Provider getProviderById(
+    public ProviderDetailsDTO getProviderDetails(
             @PathVariable Long id) {
 
-        return providerService.findById(id);
+        return providerService.findDetails(id);
     }
 
     @PutMapping("/{id}/approve")

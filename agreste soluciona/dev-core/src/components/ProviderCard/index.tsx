@@ -7,26 +7,30 @@ import {
 
 import {
   User,
-  Star,
   Briefcase,
   Clock3,
+  MapPin,
 } from 'lucide-react-native';
 
 import styles from './styles';
 
+import { useNavigation } from '@react-navigation/native';
+
 interface ProviderCardProps {
   provider: {
+    id: number;
     name: string;
     profession: string;
-    experience: string;
-    rating: number;
-    reviews: number;
+    city: string;
+    experienceYears: number;
+    availability: string;
   };
 }
 
 export default function ProviderCard({
   provider,
 }: ProviderCardProps) {
+const navigation = useNavigation();
   return (
     <View style={styles.card}>
 
@@ -47,25 +51,36 @@ export default function ProviderCard({
       </View>
 
       <View style={styles.infoRow}>
-        <Clock3 size={18} color="#666" />
+        <MapPin size={18} color="#666" />
 
         <Text style={styles.infoText}>
-          {provider.experience}
+          {provider.city}
         </Text>
       </View>
 
       <View style={styles.infoRow}>
-        <Star size={18} color="#F2B705" />
+        <Clock3 size={18} color="#666" />
 
         <Text style={styles.infoText}>
-          {provider.rating} ({provider.reviews} avaliações)
+          {provider.experienceYears} anos de experiência
         </Text>
       </View>
 
-      <TouchableOpacity style={styles.button}>
+      <View style={styles.infoRow}>
+        <Text style={styles.availability}>
+          Disponibilidade: {provider.availability}
+        </Text>
+      </View>
+
+      <TouchableOpacity style={styles.button}
+        onPress={() => {
+          navigation.navigate('ProviderDetails' as never);
+        }}
+      >
         <Text style={styles.buttonText}>
           Contratar Serviço
         </Text>
+
       </TouchableOpacity>
 
     </View>

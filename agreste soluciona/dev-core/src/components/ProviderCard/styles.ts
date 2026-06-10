@@ -2,8 +2,8 @@ import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
   card: {
-    marginTop:30,
-    width:"50%",
+    marginTop: 30,
+    width: "50%",
     backgroundColor: '#FFF',
     borderRadius: 20,
     padding: 18,
@@ -51,6 +51,11 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 15,
     fontWeight: '700',
+  },
+  availability: {
+    fontSize: 14,
+    color: '#2E7D32',
+    fontWeight: '600',
   },
 });
 

@@ -1,10 +1,10 @@
 import React from 'react';
-
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,44 +17,79 @@ import ProviderCard from '../../components/ProviderCard';
 
 import styles from './styles';
 
+import { useEffect, useState } from 'react';
+import api from '../../services/api';
+
+interface Provider {
+  id: number;
+  name: string;
+  profession: string;
+  city: string;
+  experienceYears: number;
+  availability: string;
+}
+
 export default function ProvidersFeed({ navigation }: any) {
+
+
+  useEffect(() => {
+    loadProviders();
+  }, []);
+
+  const loadProviders = async () => {
+    try {
+
+      const response = await api.get(
+        '/providers/approved'
+      );
+      console.log(
+        'Prestadores recebidos:',
+        response.data
+      );
+
+      setProviders(response.data);
+
+    } catch (error) {
+
+      console.log(error);
+
+    } finally {
+
+      setLoading(false);
+
+    }
+  };
 
   const insets = useSafeAreaInsets();
 
-  const providers = [
-    {
-      id: 1,
-      name: 'Pedro Silva',
-      profession: 'Eletricista',
-      experience: '8 anos',
-      rating: 4.8,
-      reviews: 23,
-    },
-    {
-      id: 2,
-      name: 'João Santos',
-      profession: 'Encanador',
-      experience: '5 anos',
-      rating: 4.6,
-      reviews: 18,
-    },
-    {
-      id: 3,
-      name: 'Carlos Henrique',
-      profession: 'Marceneiro',
-      experience: '10 anos',
-      rating: 4.9,
-      reviews: 41,
-    },
-    {
-      id: 4,
-      name: 'José Roberto',
-      profession: 'Pintor',
-      experience: '7 anos',
-      rating: 4.7,
-      reviews: 12,
-    },
-  ];
+
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  if (loading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <ActivityIndicator
+          size="large"
+          color="#F28C38"
+        />
+
+        <Text
+          style={{
+            marginTop: 10,
+          }}
+        >
+          Carregando prestadores...
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View
@@ -104,6 +139,18 @@ export default function ProvidersFeed({ navigation }: any) {
         renderItem={({ item }) => (
           <ProviderCard provider={item} />
         )}
+        ListEmptyComponent={
+          <View
+            style={{
+              alignItems: 'center',
+              marginTop: 50,
+            }}
+          >
+            <Text>
+              Nenhum prestador disponível.
+            </Text>
+          </View>
+        }
       />
 
     </View>

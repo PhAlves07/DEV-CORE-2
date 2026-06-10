@@ -7,8 +7,6 @@ import {
     TouchableOpacity,
     Modal,
 } from 'react-native';
-/* IMPORTAR NAVEGACAO */
-import { useNavigation } from '@react-navigation/native';
 /* IMPORTAR ICONES */
 import { Feather, Ionicons } from '@expo/vector-icons';
 /* IMPORTAR CSS */
