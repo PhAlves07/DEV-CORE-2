@@ -15,6 +15,8 @@ import {
 import styles from './styles';
 
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/AppRoutes';
 
 interface ProviderCardProps {
   provider: {
@@ -30,7 +32,9 @@ interface ProviderCardProps {
 export default function ProviderCard({
   provider,
 }: ProviderCardProps) {
-const navigation = useNavigation();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   return (
     <View style={styles.card}>
 
@@ -74,7 +78,9 @@ const navigation = useNavigation();
 
       <TouchableOpacity style={styles.button}
         onPress={() => {
-          navigation.navigate('ProviderDetails' as never);
+          navigation.navigate('ProviderDetails', {
+            providerId: provider.id,
+          });
         }}
       >
         <Text style={styles.buttonText}>

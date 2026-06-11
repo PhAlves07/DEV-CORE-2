@@ -46,6 +46,13 @@ public class ProviderController {
         return providerService.findDetails(id);
     }
 
+    @GetMapping("/user/{userId}")
+    public ProviderDetailsDTO getProviderByUser(
+            @PathVariable Long userId) {
+
+        return providerService.findDetailsByUserId(userId);
+    }
+
     @PutMapping("/{id}/approve")
     public Provider approveProvider(
             @PathVariable Long id) {

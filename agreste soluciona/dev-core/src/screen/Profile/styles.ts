@@ -9,6 +9,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 
+  content: {
+    paddingBottom: 30,
+  },
+
   backButton: {
     marginTop: 10,
     width: 45,

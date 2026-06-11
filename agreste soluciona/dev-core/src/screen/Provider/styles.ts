@@ -112,6 +112,10 @@ const styles = StyleSheet.create({
         marginTop: 35,
     },
 
+    buttonDisabled: {
+        opacity: 0.7,
+    },
+
     buttonText: {
         color: '#FFF',
         fontSize: 17,

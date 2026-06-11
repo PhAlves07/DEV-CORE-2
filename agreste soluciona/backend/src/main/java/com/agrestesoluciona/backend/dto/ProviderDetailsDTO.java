@@ -10,6 +10,7 @@ public class ProviderDetailsDTO {
     private Integer experienceYears;
     private String availability;
     private String description;
+    private Boolean hasCertificate;
 
     public ProviderDetailsDTO(
             Long id,
@@ -19,7 +20,8 @@ public class ProviderDetailsDTO {
             String city,
             Integer experienceYears,
             String availability,
-            String description) {
+            String description,
+            Boolean hasCertificate) {
 
         this.id = id;
         this.name = name;
@@ -29,6 +31,7 @@ public class ProviderDetailsDTO {
         this.experienceYears = experienceYears;
         this.availability = availability;
         this.description = description;
+        this.hasCertificate = hasCertificate;
     }
 
     public Long getId() { return id; }
@@ -39,4 +42,5 @@ public class ProviderDetailsDTO {
     public Integer getExperienceYears() { return experienceYears; }
     public String getAvailability() { return availability; }
     public String getDescription() { return description; }
+    public Boolean getHasCertificate() { return hasCertificate; }
 }

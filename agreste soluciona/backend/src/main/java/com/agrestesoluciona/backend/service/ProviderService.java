@@ -92,7 +92,25 @@ public class ProviderService {
                 provider.getCity(),
                 provider.getExperienceYears(),
                 provider.getAvailability(),
-                provider.getDescription());
+                provider.getDescription(),
+                provider.getHasCertificate());
+    }
+
+    public ProviderDetailsDTO findDetailsByUserId(Long userId) {
+
+        Provider provider = providerRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Prestador nao encontrado para este usuario"));
+
+        return new ProviderDetailsDTO(
+                provider.getId(),
+                provider.getUser().getName(),
+                provider.getUser().getPhone(),
+                provider.getProfession(),
+                provider.getCity(),
+                provider.getExperienceYears(),
+                provider.getAvailability(),
+                provider.getDescription(),
+                provider.getHasCertificate());
     }
 
 }
