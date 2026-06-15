@@ -1,4 +1,6 @@
+// React permite criar componentes e usar recursos como hooks.
 import React, { useState } from 'react';
+// Import traz dependencias usadas por este arquivo.
 import {
   View,
   Text,
@@ -9,12 +11,15 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Platform,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
+// AsyncStorage guarda dados simples no aparelho, como o usuario logado.
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// Tipos e recursos de navegacao entre telas do aplicativo.
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+// Safe Area evita que conteudo fique escondido por notch, status bar ou bordas do aparelho.
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+// Import traz dependencias usadas por este arquivo.
 import {
   ArrowLeft,
   Briefcase,
@@ -23,14 +28,23 @@ import {
   Send,
 } from 'lucide-react-native';
 
-import api from '../../services/api';
+// Servico HTTP centralizado usado para conversar com o backend.
+import api, { getApiErrorMessage } from '../../services/api';
+// Import traz dependencias usadas por este arquivo.
+import FeedbackMessage, {
+  FeedbackType,
+} from '../../components/FeedbackMessage';
+// Arquivo de estilos que separa a aparencia da logica da tela.
 import styles from './styles';
+// Tipos e recursos de navegacao entre telas do aplicativo.
 import { RootStackParamList } from '../../navigation/AppRoutes';
 
+// Type cria um apelido tipado para parametros, rotas ou estados do TypeScript.
 type RequestServiceProps = NativeStackScreenProps<
   RootStackParamList,
   'RequestService'
 >;
+
 
 interface LoggedUser {
   id: number;
@@ -39,6 +53,7 @@ interface LoggedUser {
   phone?: string;
 }
 
+
 export default function RequestServiceScreen({
   navigation,
   route,
@@ -46,37 +61,49 @@ export default function RequestServiceScreen({
   const insets = useSafeAreaInsets();
   const { providerId, providerName } = route.params;
 
+ 
   const [description, setDescription] = useState('');
+ 
   const [address, setAddress] = useState('');
+ 
   const [loading, setLoading] = useState(false);
+ 
+  const [feedback, setFeedback] = useState<{
+    type: FeedbackType;
+    message: string;
+  } | null>(null);
 
+  // Funcao assincrona usada para buscar/salvar dados ou executar uma acao do usuario.
   const handleSubmit = async () => {
     if (!description.trim() || !address.trim()) {
-      Alert.alert(
-        'Campos obrigatorios',
-        'Informe a descricao do problema e o endereco.'
-      );
+      setFeedback({
+        type: 'error',
+        message: 'Informe a descricao do problema e o endereco.',
+      });
 
       return;
     }
 
     try {
       setLoading(true);
+      setFeedback(null);
 
       const storedUser = await AsyncStorage.getItem('@user');
 
       if (!storedUser) {
-        Alert.alert(
-          'Login necessario',
-          'Faca login para solicitar um servico.'
-        );
+        setFeedback({
+          type: 'info',
+          message: 'Faca login para solicitar um servico.',
+        });
 
+        // Abre outra tela do aplicativo, podendo enviar parametros para ela.
         navigation.navigate('Login');
         return;
       }
 
       const user: LoggedUser = JSON.parse(storedUser);
 
+      
       await api.post('/service-requests', {
         clientId: user.id,
         providerId,
@@ -84,23 +111,20 @@ export default function RequestServiceScreen({
         address: address.trim(),
       });
 
-      Alert.alert(
-        'Sucesso',
-        'Solicitacao enviada com sucesso. Aguarde o retorno do prestador.',
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.goBack(),
-          },
-        ]
-      );
+      setFeedback({
+        type: 'success',
+        message: 'Solicitacao enviada. Aguarde o retorno do prestador.',
+      });
+      // Retorna para a tela anterior na pilha de navegacao.
+      setTimeout(() => navigation.goBack(), 1200);
     } catch (error: any) {
-      console.log(error);
-
-      Alert.alert(
-        'Erro',
-        error.response?.data || 'Nao foi possivel enviar a solicitacao.'
-      );
+      setFeedback({
+        type: 'error',
+        message: getApiErrorMessage(
+          error,
+          'Nao foi possivel enviar a solicitacao.'
+        ),
+      });
     } finally {
       setLoading(false);
     }
@@ -124,6 +148,7 @@ export default function RequestServiceScreen({
           <View style={styles.header}>
             <TouchableOpacity
               style={styles.backButton}
+              // Retorna para a tela anterior na pilha de navegacao.
               onPress={() => navigation.goBack()}
             >
               <ArrowLeft size={24} color="#111" />
@@ -145,6 +170,13 @@ export default function RequestServiceScreen({
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={styles.content}
           >
+            {feedback && (
+              <FeedbackMessage
+                type={feedback.type}
+                message={feedback.message}
+              />
+            )}
+
             <View style={styles.providerCard}>
               <View style={styles.providerIcon}>
                 <Briefcase size={26} color="#F28C38" />

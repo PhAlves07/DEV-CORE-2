@@ -1,8 +1,11 @@
 package com.agrestesoluciona.backend.dto;
 
+// Import traz uma classe/anotacao necessaria para este arquivo Java.
 import com.agrestesoluciona.backend.model.RequestStatus;
 
+// Import traz uma classe/anotacao necessaria para este arquivo Java.
 import java.time.LocalDateTime;
+
 
 public class ProviderServiceRequestDTO {
 
@@ -34,26 +37,32 @@ public class ProviderServiceRequestDTO {
         this.createdAt = createdAt;
     }
 
+    
     public Long getId() {
         return id;
     }
 
+    
     public String getClientName() {
         return clientName;
     }
 
+    
     public String getDescription() {
         return description;
     }
 
+    
     public String getAddress() {
         return address;
     }
 
+    
     public RequestStatus getStatus() {
         return status;
     }
 
+    
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }

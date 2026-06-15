@@ -1,3 +1,4 @@
+// Import traz dependencias usadas por este arquivo.
 import {
   View,
   Text,
@@ -6,16 +7,20 @@ import {
   Animated,
 } from 'react-native';
 
+// Tipos e recursos de navegacao entre telas do aplicativo.
 import { useNavigation } from '@react-navigation/native';
 
+// Arquivo de estilos que separa a aparencia da logica da tela.
 import styles from './styles';
 
 
 
+// Import traz dependencias usadas por este arquivo.
 import React, {
   useEffect,
   useRef,
 } from 'react';
+
 
 export default function SplashScreen() {
   const navigation = useNavigation();
@@ -40,11 +45,13 @@ export default function SplashScreen() {
       useNativeDriver: true,
     }).start(() => {
 
+      // Abre outra tela do aplicativo, podendo enviar parametros para ela.
       navigation.navigate('Home' as never);
 
     });
   };
 
+  // Hook executado para carregar dados ou reagir a mudancas de parametros/estado.
   useEffect(() => {
 
     Animated.parallel([

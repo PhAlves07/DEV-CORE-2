@@ -1,3 +1,4 @@
+// Import traz dependencias usadas por este arquivo.
 import {
     View,
     Text,
@@ -8,17 +9,24 @@ import {
     Modal,
 } from 'react-native';
 /* IMPORTAR ICONES */
+// Biblioteca de icones usada para melhorar a comunicacao visual dos botoes e cards.
 import { Feather, Ionicons } from '@expo/vector-icons';
 /* IMPORTAR CSS */
+// Arquivo de estilos que separa a aparencia da logica da tela.
 import styles from './styles';
 /* IMPORTAR CARROSSEL */
+// Import traz dependencias usadas por este arquivo.
 import ServiceCard from '../../components/ServiceCard';
 /* IMPORTAR ASYNC */
+// AsyncStorage guarda dados simples no aparelho, como o usuario logado.
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// React permite criar componentes e usar recursos como hooks.
 import { useEffect } from 'react';
 /* IMPORTAR USESTATE */
+// React permite criar componentes e usar recursos como hooks.
 import { useState } from 'react';
 /* IMPORTAR ICONES LUCIDE */
+// Import traz dependencias usadas por este arquivo.
 import {
     Zap,
     Wrench,
@@ -28,20 +36,29 @@ import {
     Ellipsis,
 } from 'lucide-react-native';
 
+
 export default function HomeScreen({ navigation }: any) {
 
+   
     const [user, setUser] = useState<any>(null);
+   
     const [userName, setUserName] = useState('');
+   
     const [menuVisible, setMenuVisible] = useState(false);
+   
+    const [searchText, setSearchText] = useState('');
 
+   
     const [userData, setUserData] = useState<any>(null);
 
 
+    // Funcao assincrona usada para buscar/salvar dados ou executar uma acao do usuario.
     const handleProfile = async () => {
 
         const user = await AsyncStorage.getItem('@user');
 
         if (user) {
+            // Abre outra tela do aplicativo, podendo enviar parametros para ela.
             navigation.navigate('Profile', {
                 user: JSON.parse(user),
             });
@@ -50,10 +67,16 @@ export default function HomeScreen({ navigation }: any) {
 
 
 
+    // Hook executado para carregar dados ou reagir a mudancas de parametros/estado.
     useEffect(() => {
         loadUser();
-    }, []);
 
+        const unsubscribe = navigation.addListener('focus', loadUser);
+
+        return unsubscribe;
+    }, [navigation]);
+
+    // Funcao assincrona usada para buscar/salvar dados ou executar uma acao do usuario.
     const loadUser = async () => {
 
         const userData = await AsyncStorage.getItem('@user');
@@ -70,13 +93,25 @@ export default function HomeScreen({ navigation }: any) {
         }
 
     };
+    // Funcao assincrona usada para buscar/salvar dados ou executar uma acao do usuario.
     const handleLogout = async () => {
 
         await AsyncStorage.removeItem('@user');
 
+        // Abre outra tela do aplicativo, podendo enviar parametros para ela.
         navigation.navigate('Login' as never);
 
     };
+
+    const handleSearchProviders = () => {
+        const search = searchText.trim();
+
+        // Abre outra tela do aplicativo, podendo enviar parametros para ela.
+        navigation.navigate('ProvidersFeed', {
+            search: search || undefined,
+        });
+    };
+
     const categories = [
         {
             id: 1,
@@ -100,7 +135,7 @@ export default function HomeScreen({ navigation }: any) {
         },
         {
             id: 5,
-            name: 'Marceneiro',
+            name: 'Pedreiro',
             icon: Hammer,
         },
         {
@@ -109,6 +144,9 @@ export default function HomeScreen({ navigation }: any) {
             icon: Ellipsis,
         },
     ];
+
+    const isAdmin = Boolean(user?.admin);
+
     return (
 
         <ScrollView style={styles.container}>
@@ -159,22 +197,32 @@ export default function HomeScreen({ navigation }: any) {
             <View style={styles.searchContainer}>
                 <TextInput
                     placeholder="No que você está procurando?"
-                    style={styles.input} />
+                    style={styles.input}
+                    value={searchText}
+                    onChangeText={setSearchText}
+                    returnKeyType="search"
+                    onSubmitEditing={handleSearchProviders}
+                />
 
-                <Ionicons
-                    name="search"
-                    size={20}
-                    color="#777" />
+                <TouchableOpacity
+                    style={styles.searchButton}
+                    onPress={handleSearchProviders}
+                >
+                    <Ionicons
+                        name="search"
+                        size={20}
+                        color="#777"
+                    />
+                </TouchableOpacity>
             </View>
 
             {/* BOTÃO */}
-            <TouchableOpacity style={styles.button}
-                onPress={() => {
-                    navigation.navigate('ProvidersFeed' as never);
-                }}
+            <TouchableOpacity
+                style={styles.button}
+                onPress={handleSearchProviders}
             >
                 <Text style={styles.buttonText}>
-                    Contratar
+                    Pesquisar
                 </Text>
             </TouchableOpacity>
 
@@ -187,7 +235,18 @@ export default function HomeScreen({ navigation }: any) {
                     const Icon = item.icon;
 
                     return (
-                        <TouchableOpacity key={item.id} style={styles.card}>
+                        <TouchableOpacity
+                            key={item.id}
+                            style={styles.card}
+                            onPress={() => {
+                                // Abre outra tela do aplicativo, podendo enviar parametros para ela.
+                                navigation.navigate('ProvidersFeed', {
+                                    profession: item.name === 'Outros'
+                                        ? undefined
+                                        : item.name,
+                                });
+                            }}
+                        >
                             <Icon size={38} color="#F28C38" />
 
                             <Text style={styles.cardText}>
@@ -227,22 +286,49 @@ export default function HomeScreen({ navigation }: any) {
                         {
                             user ? (
 
-                                <TouchableOpacity
-                                    style={styles.menuItem}
-                                    onPress={handleLogout}
-                                >
+                                <>
 
-                                    <Feather
-                                        name="log-out"
-                                        size={22}
-                                        color="red"
-                                    />
+                                    {isAdmin && (
+                                        <TouchableOpacity
+                                            style={styles.menuItem}
+                                            onPress={() => {
+                                                setMenuVisible(false);
+                                                // Abre outra tela do aplicativo, podendo enviar parametros para ela.
+                                                navigation.navigate('AdminDashboard' as never);
+                                            }}
+                                        >
 
-                                    <Text style={styles.logoutText}>
-                                        Logout
-                                    </Text>
+                                            <Feather
+                                                name="settings"
+                                                size={22}
+                                                color="#000"
+                                            />
 
-                                </TouchableOpacity>
+                                            <Text style={styles.menuText}>
+                                                Admin
+                                            </Text>
+
+                                        </TouchableOpacity>
+                                    )}
+
+                                    <TouchableOpacity
+                                        style={styles.menuItem}
+                                        onPress={handleLogout}
+                                    >
+
+                                        <Feather
+                                            name="log-out"
+                                            size={22}
+                                            color="red"
+                                        />
+
+                                        <Text style={styles.logoutText}>
+                                            Logout
+                                        </Text>
+
+                                    </TouchableOpacity>
+
+                                </>
 
                             ) : (
 
@@ -252,6 +338,7 @@ export default function HomeScreen({ navigation }: any) {
                                         style={styles.menuItem}
                                         onPress={() => {
                                             setMenuVisible(false);
+                                            // Abre outra tela do aplicativo, podendo enviar parametros para ela.
                                             navigation.navigate('Login' as never);
                                         }}
                                     >
@@ -272,6 +359,7 @@ export default function HomeScreen({ navigation }: any) {
                                         style={styles.menuItem}
                                         onPress={() => {
                                             setMenuVisible(false);
+                                            // Abre outra tela do aplicativo, podendo enviar parametros para ela.
                                             navigation.navigate('Register' as never);
                                         }}
                                     >

@@ -1,4 +1,6 @@
+// React Native fornece componentes visuais e APIs nativas usadas na tela.
 import { StyleSheet } from 'react-native';
+// Import traz dependencias usadas por este arquivo.
 import { blue } from 'react-native-reanimated/lib/typescript/Colors';
 
 const styles = StyleSheet.create({

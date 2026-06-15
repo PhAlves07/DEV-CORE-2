@@ -1,3 +1,4 @@
+// Import traz dependencias usadas por este arquivo.
 import {
     View,
     Text,
@@ -7,48 +8,112 @@ import {
     KeyboardAvoidingView,
     TouchableWithoutFeedback,
     Keyboard,
-    Alert,
     Platform,
     Image,
 } from 'react-native';
 
 /* IMPORTAR ICONES */
+// Biblioteca de icones usada para melhorar a comunicacao visual dos botoes e cards.
 import { Ionicons } from '@expo/vector-icons';
 /* IMPORTAR USESTATE */
+// React permite criar componentes e usar recursos como hooks.
 import { useState } from 'react';
 /* IMPORTAR CSS */
+// Arquivo de estilos que separa a aparencia da logica da tela.
 import styles from './styles';
 /* IMPORTAR CARREGAMENTO */
+// React Native fornece componentes visuais e APIs nativas usadas na tela.
 import { ActivityIndicator, } from 'react-native';
 /* IMPORTAR API */
-import api from '../../services/api';
+// Servico HTTP centralizado usado para conversar com o backend.
+import api, { getApiErrorMessage } from '../../services/api';
+// Import traz dependencias usadas por este arquivo.
+import FeedbackMessage, {
+    FeedbackType,
+} from '../../components/FeedbackMessage';
 /* IMPORTAR NAVEGAÇÃO ROTAS */
+// Tipos e recursos de navegacao entre telas do aplicativo.
 import { useNavigation } from '@react-navigation/native';
+
 
 
 export default function RegisterScreen() {
 
     const navigation = useNavigation();
+   
     const [name, setName] = useState('');
+   
     const [email, setEmail] = useState('');
+   
     const [phone, setPhone] = useState('');
+   
     const [password, setPassword] = useState('');
+   
     const [confirmPassword, setConfirmPassword] = useState('');
+   
     const [nameError, setNameError] = useState('');
+   
     const [emailError, setEmailError] = useState('');
+   
     const [phoneError, setPhoneError] = useState('');
+   
     const [passwordError, setPasswordError] = useState('');
+   
+    const [confirmPasswordError, setConfirmPasswordError] = useState('');
+   
+    const [loading, setLoading] = useState(false);
+   
+    const [feedback, setFeedback] = useState<{
+        type: FeedbackType;
+        message: string;
+    } | null>(null);
 
 
+   
     const [showPassword, setShowPassword] = useState(false);
+   
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
 
+    // Funcao assincrona usada para buscar/salvar dados ou executar uma acao do usuario.
     const handleRegister = async () => {
+        setNameError('');
+        setEmailError('');
+        setPhoneError('');
+        setPasswordError('');
+        setConfirmPasswordError('');
+        setFeedback(null);
+
+        if (!name.trim()) {
+            setNameError('Informe seu nome.');
+            return;
+        }
+
+        if (!email.trim()) {
+            setEmailError('Informe seu e-mail.');
+            return;
+        }
+
+        if (!phone.trim()) {
+            setPhoneError('Informe seu telefone.');
+            return;
+        }
+
+        if (!password.trim()) {
+            setPasswordError('Informe sua senha.');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            setConfirmPasswordError('As senhas nao conferem.');
+            return;
+        }
 
         try {
+            setLoading(true);
 
-            const response = await api.post(
+            
+            await api.post(
                 '/users/register',
                 {
                     name,
@@ -58,23 +123,22 @@ export default function RegisterScreen() {
                 }
             );
 
-            Alert.alert(
-                'Sucesso',
-                response.data
-            );
+            setFeedback({
+                type: 'success',
+                message: 'Conta criada com sucesso. Voce ja pode fazer login.',
+            });
 
         } catch (error: any) {
-
-            console.log(error);
-
-            Alert.alert(
-                'Erro',
-                error.response?.data || 'Erro ao cadastrar'
-            );
-
+            setFeedback({
+                type: 'error',
+                message: getApiErrorMessage(error, 'Erro ao cadastrar'),
+            });
+        } finally {
+            setLoading(false);
         }
 
     };
+    
     function formatPhone(value: string) {
 
         /* REMOVE TUDO QUE NÃO FOR NÚMERO */
@@ -116,6 +180,7 @@ export default function RegisterScreen() {
                     showsVerticalScrollIndicator={false}
                 >
                     <TouchableOpacity
+                        // Abre outra tela do aplicativo, podendo enviar parametros para ela.
                         onPress={() => navigation.navigate('Home' as never)}
                         style={[
                              styles.buttonBack
@@ -141,6 +206,13 @@ export default function RegisterScreen() {
                     <Text style={styles.subtitle}>
                         Cadastre-se para continuar
                     </Text>
+
+                    {feedback && (
+                        <FeedbackMessage
+                            type={feedback.type}
+                            message={feedback.message}
+                        />
+                    )}
 
                     {/* INPUT NOME */}
                     <TextInput
@@ -264,19 +336,35 @@ export default function RegisterScreen() {
                     </View>
 
 
+                    {confirmPasswordError ? (
+                        <Text style={styles.errorText}>
+                            {confirmPasswordError}
+                        </Text>
+                    ) : null}
+
                     {/* BOTÃO */}
                     <TouchableOpacity
 
                         onPress={handleRegister}
+                        disabled={loading}
 
                         style={[
                             styles.button,
+                            loading && {
+                                opacity: 0.7,
+                            },
                         ]}
                     >
 
+                        {loading ? (
+                            <ActivityIndicator
+                                color="#FFF"
+                            />
+                        ) : (
                                 <Text style={styles.buttonText}>
                                     Criar conta
                                 </Text>
+                        )}
                     </TouchableOpacity>
                 </ScrollView>
 

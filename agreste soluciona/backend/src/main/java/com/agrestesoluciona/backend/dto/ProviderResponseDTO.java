@@ -1,5 +1,6 @@
 package com.agrestesoluciona.backend.dto;
 
+
 public class ProviderResponseDTO {
 
     private Long id;
@@ -14,6 +15,10 @@ public class ProviderResponseDTO {
 
     private String availability;
 
+    private Double rating;
+
+    private Long reviewsCount;
+
     public ProviderResponseDTO() {
     }
 
@@ -23,7 +28,9 @@ public class ProviderResponseDTO {
             String profession,
             String city,
             Integer experienceYears,
-            String availability) {
+            String availability,
+            Double rating,
+            Long reviewsCount) {
 
         this.id = id;
         this.name = name;
@@ -31,53 +38,87 @@ public class ProviderResponseDTO {
         this.city = city;
         this.experienceYears = experienceYears;
         this.availability = availability;
+        this.rating = rating;
+        this.reviewsCount = reviewsCount;
     }
 
+    
     public Long getId() {
         return id;
     }
 
+    
     public String getName() {
         return name;
     }
 
+    
     public String getProfession() {
         return profession;
     }
 
+    
     public String getCity() {
         return city;
     }
 
+    
     public Integer getExperienceYears() {
         return experienceYears;
     }
 
+    
     public String getAvailability() {
         return availability;
     }
 
+    
+    public Double getRating() {
+        return rating;
+    }
+
+    
+    public Long getReviewsCount() {
+        return reviewsCount;
+    }
+
+    
     public void setId(Long id) {
         this.id = id;
     }
 
+    
     public void setName(String name) {
         this.name = name;
     }
 
+    
     public void setProfession(String profession) {
         this.profession = profession;
     }
 
+    
     public void setCity(String city) {
         this.city = city;
     }
 
+    
     public void setExperienceYears(Integer experienceYears) {
         this.experienceYears = experienceYears;
     }
 
+    
     public void setAvailability(String availability) {
         this.availability = availability;
+    }
+
+    
+    public void setRating(Double rating) {
+        this.rating = rating;
+    }
+
+    
+    public void setReviewsCount(Long reviewsCount) {
+        this.reviewsCount = reviewsCount;
     }
 }

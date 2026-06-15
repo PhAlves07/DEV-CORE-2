@@ -1,3 +1,4 @@
+// React Native fornece componentes visuais e APIs nativas usadas na tela.
 import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
@@ -105,6 +106,14 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     color: '#333',
+  },
+
+  searchButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   /* BOTÃO */

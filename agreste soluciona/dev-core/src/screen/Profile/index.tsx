@@ -1,4 +1,6 @@
+// React permite criar componentes e usar recursos como hooks.
 import React, { useEffect, useState } from 'react';
+// Import traz dependencias usadas por este arquivo.
 import {
   View,
   Text,
@@ -6,8 +8,11 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
+// AsyncStorage guarda dados simples no aparelho, como o usuario logado.
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// Safe Area evita que conteudo fique escondido por notch, status bar ou bordas do aparelho.
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+// Import traz dependencias usadas por este arquivo.
 import {
   ArrowLeft,
   UserCircle2,
@@ -19,8 +24,11 @@ import {
   LayoutDashboard,
 } from 'lucide-react-native';
 
+// Servico HTTP centralizado usado para conversar com o backend.
 import api from '../../services/api';
+// Arquivo de estilos que separa a aparencia da logica da tela.
 import styles from './styles';
+
 
 interface LoggedUser {
   id: number;
@@ -29,39 +37,80 @@ interface LoggedUser {
   phone: string;
 }
 
+
 interface ProviderDetails {
   id: number;
 }
 
+
 export default function ProfileScreen({ navigation, route }: any) {
   const insets = useSafeAreaInsets();
 
+ 
   const [user, setUser] = useState<LoggedUser | null>(
     route.params?.user || null
   );
+ 
+  const [providerId, setProviderId] = useState<number | null>(null);
+ 
+  const [providerChecked, setProviderChecked] = useState(false);
 
+  // Hook executado para carregar dados ou reagir a mudancas de parametros/estado.
   useEffect(() => {
-    loadUser();
-  }, []);
+    loadProfile();
 
-  const loadUser = async () => {
-    if (user) {
+    const unsubscribe = navigation.addListener('focus', loadProfile);
+
+    return unsubscribe;
+  }, [navigation]);
+
+  // Funcao assincrona usada para buscar/salvar dados ou executar uma acao do usuario.
+  const loadProfile = async () => {
+    setProviderChecked(false);
+
+    const storedUser = await AsyncStorage.getItem('@user');
+    const loggedUser: LoggedUser | null = storedUser
+      ? JSON.parse(storedUser)
+      : route.params?.user || null;
+
+    if (!loggedUser) {
+      setProviderId(null);
+      setProviderChecked(true);
       return;
     }
 
-    const storedUser = await AsyncStorage.getItem('@user');
+    setUser(loggedUser);
 
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    try {
+      
+      const response = await api.get<ProviderDetails>(
+        `/providers/user/${loggedUser.id}`
+      );
+
+      setProviderId(response.data.id);
+    } catch {
+      setProviderId(null);
+    } finally {
+      setProviderChecked(true);
     }
   };
 
   const handleMyRequests = () => {
+    // Abre outra tela do aplicativo, podendo enviar parametros para ela.
     navigation.navigate('MyRequests');
   };
 
+  // Funcao assincrona usada para buscar/salvar dados ou executar uma acao do usuario.
   const handleProviderDashboard = async () => {
     try {
+      if (providerId) {
+        // Abre outra tela do aplicativo, podendo enviar parametros para ela.
+        navigation.navigate('ProviderDashboard', {
+          providerId,
+        });
+        return;
+      }
+
       const storedUser = await AsyncStorage.getItem('@user');
 
       if (!storedUser) {
@@ -70,16 +119,19 @@ export default function ProfileScreen({ navigation, route }: any) {
           'Faca login para acessar o painel do prestador.'
         );
 
+        // Abre outra tela do aplicativo, podendo enviar parametros para ela.
         navigation.navigate('Login');
         return;
       }
 
       const loggedUser: LoggedUser = JSON.parse(storedUser);
 
+      
       const response = await api.get<ProviderDetails>(
         `/providers/user/${loggedUser.id}`
       );
 
+      // Abre outra tela do aplicativo, podendo enviar parametros para ela.
       navigation.navigate('ProviderDashboard', {
         providerId: response.data.id,
       });
@@ -109,6 +161,7 @@ export default function ProfileScreen({ navigation, route }: any) {
       >
         <TouchableOpacity
           style={styles.backButton}
+          // Retorna para a tela anterior na pilha de navegacao.
           onPress={() => navigation.goBack()}
         >
           <ArrowLeft size={24} color="#000" />
@@ -177,51 +230,56 @@ export default function ProfileScreen({ navigation, route }: any) {
           <ChevronRight size={24} color="#999" />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.providerCard}
-          onPress={handleProviderDashboard}
-        >
-          <View style={styles.providerLeft}>
-            <View style={styles.providerIcon}>
-              <LayoutDashboard size={28} color="#fff" />
+        {providerChecked && providerId && (
+          <TouchableOpacity
+            style={styles.providerCard}
+            onPress={handleProviderDashboard}
+          >
+            <View style={styles.providerLeft}>
+              <View style={styles.providerIcon}>
+                <LayoutDashboard size={28} color="#fff" />
+              </View>
+
+              <View>
+                <Text style={styles.providerTitle}>
+                  Painel do Prestador
+                </Text>
+
+                <Text style={styles.providerSubtitle}>
+                  Visualize e responda pedidos recebidos
+                </Text>
+              </View>
             </View>
 
-            <View>
-              <Text style={styles.providerTitle}>
-                Painel do Prestador
-              </Text>
+            <ChevronRight size={24} color="#999" />
+          </TouchableOpacity>
+        )}
 
-              <Text style={styles.providerSubtitle}>
-                Visualize e responda pedidos recebidos
-              </Text>
+        {providerChecked && !providerId && (
+          <TouchableOpacity
+            style={styles.providerCard}
+            // Abre outra tela do aplicativo, podendo enviar parametros para ela.
+            onPress={() => navigation.navigate('Provider')}
+          >
+            <View style={styles.providerLeft}>
+              <View style={styles.providerIcon}>
+                <Briefcase size={28} color="#fff" />
+              </View>
+
+              <View>
+                <Text style={styles.providerTitle}>
+                  Tornar-se Prestador
+                </Text>
+
+                <Text style={styles.providerSubtitle}>
+                  Cadastre seus servicos na plataforma
+                </Text>
+              </View>
             </View>
-          </View>
 
-          <ChevronRight size={24} color="#999" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.providerCard}
-          onPress={() => navigation.navigate('Provider')}
-        >
-          <View style={styles.providerLeft}>
-            <View style={styles.providerIcon}>
-              <Briefcase size={28} color="#fff" />
-            </View>
-
-            <View>
-              <Text style={styles.providerTitle}>
-                Tornar-se Prestador
-              </Text>
-
-              <Text style={styles.providerSubtitle}>
-                Cadastre seus servicos na plataforma
-              </Text>
-            </View>
-          </View>
-
-          <ChevronRight size={24} color="#999" />
-        </TouchableOpacity>
+            <ChevronRight size={24} color="#999" />
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </View>
   );

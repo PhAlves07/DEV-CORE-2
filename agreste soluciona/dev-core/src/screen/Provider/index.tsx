@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+// React permite criar componentes e usar recursos como hooks.
+import React, { useEffect, useState } from 'react';
+// Import traz dependencias usadas por este arquivo.
 import {
     View,
     Text,
     TextInput,
     TouchableOpacity,
     ScrollView,
-    Alert,
     Image,
     KeyboardAvoidingView,
     Platform,
@@ -13,8 +14,11 @@ import {
     Keyboard,
     ActivityIndicator,
 } from 'react-native';
+// AsyncStorage guarda dados simples no aparelho, como o usuario logado.
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// Safe Area evita que conteudo fique escondido por notch, status bar ou bordas do aparelho.
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+// Import traz dependencias usadas por este arquivo.
 import {
     ArrowLeft,
     Briefcase,
@@ -25,10 +29,18 @@ import {
     IdCard,
     Calendar,
 } from 'lucide-react-native';
+// Expo Image Picker permite selecionar imagens do dispositivo.
 import * as ImagePicker from 'expo-image-picker';
 
-import api from '../../services/api';
+// Servico HTTP centralizado usado para conversar com o backend.
+import api, { getApiErrorMessage } from '../../services/api';
+// Import traz dependencias usadas por este arquivo.
+import FeedbackMessage, {
+    FeedbackType,
+} from '../../components/FeedbackMessage';
+// Arquivo de estilos que separa a aparencia da logica da tela.
 import styles from './styles';
+
 
 interface LoggedUser {
     id: number;
@@ -37,19 +49,76 @@ interface LoggedUser {
     phone?: string;
 }
 
+
 export default function ProviderScreen({ navigation }: any) {
     const insets = useSafeAreaInsets();
 
+   
     const [profession, setProfession] = useState('');
+   
     const [city, setCity] = useState('');
+   
     const [document, setDocument] = useState('');
+   
     const [experienceYears, setExperienceYears] = useState('');
+   
     const [availability, setAvailability] = useState('');
+   
     const [hasCertificate, setHasCertificate] = useState('');
+   
     const [certificateImage, setCertificateImage] = useState('');
+   
     const [description, setDescription] = useState('');
+   
     const [loading, setLoading] = useState(false);
+   
+    const [checkingProvider, setCheckingProvider] = useState(true);
+   
+    const [feedback, setFeedback] = useState<{
+        type: FeedbackType;
+        message: string;
+    } | null>(null);
 
+    // Hook executado para carregar dados ou reagir a mudancas de parametros/estado.
+    useEffect(() => {
+        checkExistingProvider();
+
+        const unsubscribe = navigation.addListener(
+            'focus',
+            checkExistingProvider
+        );
+
+        return unsubscribe;
+    }, [navigation]);
+
+    // Funcao assincrona usada para buscar/salvar dados ou executar uma acao do usuario.
+    const checkExistingProvider = async () => {
+        try {
+            setCheckingProvider(true);
+
+            const storedUser = await AsyncStorage.getItem('@user');
+
+            if (!storedUser) {
+                return;
+            }
+
+            const user: LoggedUser = JSON.parse(storedUser);
+            
+            const response = await api.get(`/providers/user/${user.id}`);
+
+            if (response.data?.id) {
+                navigation.replace('ProviderDashboard', {
+                    providerId: response.data.id,
+                });
+            }
+        } catch {
+            // Usuario ainda nao possui cadastro de prestador.
+        } finally {
+            setCheckingProvider(false);
+        }
+    };
+
+    // Funcao assincrona usada para buscar/salvar dados ou executar uma acao do usuario.
     const handleRegisterProvider = async () => {
         if (
             !profession.trim() ||
@@ -60,10 +129,10 @@ export default function ProviderScreen({ navigation }: any) {
             !hasCertificate.trim() ||
             !description.trim()
         ) {
-            Alert.alert(
-                'Campos obrigatorios',
-                'Preencha todas as informacoes.'
-            );
+            setFeedback({
+                type: 'error',
+                message: 'Preencha todas as informacoes.',
+            });
 
             return;
         }
@@ -74,25 +143,27 @@ export default function ProviderScreen({ navigation }: any) {
             Number.isNaN(parsedExperienceYears) ||
             parsedExperienceYears < 0
         ) {
-            Alert.alert(
-                'Experiencia invalida',
-                'Informe os anos de experiencia usando apenas numeros.'
-            );
+            setFeedback({
+                type: 'error',
+                message: 'Informe os anos de experiencia usando apenas numeros.',
+            });
 
             return;
         }
 
         try {
             setLoading(true);
+            setFeedback(null);
 
             const storedUser = await AsyncStorage.getItem('@user');
 
             if (!storedUser) {
-                Alert.alert(
-                    'Login necessario',
-                    'Faca login para cadastrar seus servicos.'
-                );
+                setFeedback({
+                    type: 'info',
+                    message: 'Faca login para cadastrar seus servicos.',
+                });
 
+                // Abre outra tela do aplicativo, podendo enviar parametros para ela.
                 navigation.navigate('Login');
                 return;
             }
@@ -101,6 +172,24 @@ export default function ProviderScreen({ navigation }: any) {
             const hasCertificateValue =
                 hasCertificate.trim().toLowerCase() === 'sim';
 
+            const existingProvider = await api
+                .get(`/providers/user/${user.id}`)
+                .then((response) => response.data)
+                .catch(() => null);
+
+            if (existingProvider?.id) {
+                setFeedback({
+                    type: 'info',
+                    message: 'Voce ja possui cadastro de prestador.',
+                });
+
+                navigation.replace('ProviderDashboard', {
+                    providerId: existingProvider.id,
+                });
+                return;
+            }
+
+            
             await api.post('/providers', {
                 profession: profession.trim(),
                 cpfCnpj: document.trim(),
@@ -117,30 +206,26 @@ export default function ProviderScreen({ navigation }: any) {
                 },
             });
 
-            Alert.alert(
-                'Cadastro enviado',
-                'Cadastro concluido, aguarde ser aprovado.',
-                [
-                    {
-                        text: 'OK',
-                        onPress: () => navigation.goBack(),
-                    },
-                ]
-            );
+            setFeedback({
+                type: 'success',
+                message: 'Cadastro enviado. Aguarde a aprovacao do administrador.',
+            });
+            // Retorna para a tela anterior na pilha de navegacao.
+            setTimeout(() => navigation.goBack(), 1200);
         } catch (error: any) {
-            console.log(error);
-
-            Alert.alert(
-                'Erro',
-                error.response?.data?.message ||
-                error.response?.data ||
-                'Nao foi possivel cadastrar o prestador.'
-            );
+            setFeedback({
+                type: 'error',
+                message: getApiErrorMessage(
+                    error,
+                    'Nao foi possivel cadastrar o prestador.'
+                ),
+            });
         } finally {
             setLoading(false);
         }
     };
 
+    // Funcao assincrona usada para buscar/salvar dados ou executar uma acao do usuario.
     const pickCertificateImage = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -162,6 +247,15 @@ export default function ProviderScreen({ navigation }: any) {
                 },
             ]}
         >
+            {checkingProvider ? (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator color="#F28C38" size="large" />
+
+                    <Text style={styles.loadingText}>
+                        Verificando cadastro...
+                    </Text>
+                </View>
+            ) : (
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -175,6 +269,7 @@ export default function ProviderScreen({ navigation }: any) {
                         <View style={styles.header}>
                             <TouchableOpacity
                                 style={styles.backButton}
+                                // Retorna para a tela anterior na pilha de navegacao.
                                 onPress={() => navigation.goBack()}
                             >
                                 <ArrowLeft size={24} color="#000" />
@@ -196,6 +291,13 @@ export default function ProviderScreen({ navigation }: any) {
                         </View>
 
                         <View style={styles.formContainer}>
+                            {feedback && (
+                                <FeedbackMessage
+                                    type={feedback.type}
+                                    message={feedback.message}
+                                />
+                            )}
+
                             <Text style={styles.label}>
                                 Profissao
                             </Text>
@@ -352,6 +454,7 @@ export default function ProviderScreen({ navigation }: any) {
                     </ScrollView>
                 </TouchableWithoutFeedback>
             </KeyboardAvoidingView>
+            )}
         </View>
     );
 }

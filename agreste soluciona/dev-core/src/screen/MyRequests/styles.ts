@@ -1,3 +1,4 @@
+// React Native fornece componentes visuais e APIs nativas usadas na tela.
 import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
@@ -176,6 +177,33 @@ const styles = StyleSheet.create({
 
   statusTextCOMPLETED: {
     color: '#1565C0',
+  },
+
+  reviewButton: {
+    marginTop: 14,
+    height: 48,
+    borderRadius: 15,
+    backgroundColor: '#F28C38',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+
+  reviewButtonText: {
+    marginLeft: 7,
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+
+  chatButton: {
+    marginTop: 14,
+    height: 48,
+    borderRadius: 15,
+    backgroundColor: '#F28C38',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
   },
 });
 

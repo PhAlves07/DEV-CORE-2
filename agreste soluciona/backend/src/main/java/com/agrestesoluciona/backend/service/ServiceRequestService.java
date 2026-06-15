@@ -1,18 +1,29 @@
 package com.agrestesoluciona.backend.service;
 
+// Import traz uma classe/anotacao necessaria para este arquivo Java.
 import com.agrestesoluciona.backend.dto.ClientServiceRequestDTO;
+// Import traz uma classe/anotacao necessaria para este arquivo Java.
 import com.agrestesoluciona.backend.dto.CreateServiceRequestDTO;
+// Import traz uma classe/anotacao necessaria para este arquivo Java.
 import com.agrestesoluciona.backend.dto.ProviderServiceRequestDTO;
+// Import traz uma classe/anotacao necessaria para este arquivo Java.
 import com.agrestesoluciona.backend.dto.ServiceRequestResponseDTO;
+// Import traz uma classe/anotacao necessaria para este arquivo Java.
 import com.agrestesoluciona.backend.model.*;
+// Import traz uma classe/anotacao necessaria para este arquivo Java.
 import com.agrestesoluciona.backend.repository.*;
 
+// Marca a classe como service, camada onde ficam regras de negocio.
 import org.springframework.stereotype.Service;
 
+// Import traz uma classe/anotacao necessaria para este arquivo Java.
 import java.time.LocalDateTime;
+// List representa uma colecao ordenada de objetos retornados ou processados.
 import java.util.List;
 
+// Marca a classe como camada de servico, onde ficam regras de negocio.
 @Service
+
 public class ServiceRequestService {
 
     private final ServiceRequestRepository serviceRequestRepository;
@@ -29,12 +40,15 @@ public class ServiceRequestService {
         this.providerRepository = providerRepository;
     }
 
+    
     public ServiceRequestResponseDTO createRequest(
             CreateServiceRequestDTO dto) {
 
+        // Acesso ao banco por repository; o Spring Data implementa a operacao automaticamente.
         User client = userRepository.findById(dto.getClientId())
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
+        // Acesso ao banco por repository; o Spring Data implementa a operacao automaticamente.
         Provider provider = providerRepository.findById(dto.getProviderId())
                 .orElseThrow(() -> new RuntimeException("Prestador não encontrado"));
 
@@ -49,11 +63,13 @@ public class ServiceRequestService {
 
         request.setCreatedAt(LocalDateTime.now());
 
+        // Acesso ao banco por repository; o Spring Data implementa a operacao automaticamente.
         ServiceRequest saved = serviceRequestRepository.save(request);
 
         return toResponseDTO(saved);
     }
 
+    
     public List<ClientServiceRequestDTO> findByClient(
             Long clientId) {
 
@@ -64,6 +80,7 @@ public class ServiceRequestService {
                 .toList();
     }
 
+    
     public List<ProviderServiceRequestDTO> findByProvider(
             Long providerId) {
 
@@ -74,6 +91,7 @@ public class ServiceRequestService {
                 .toList();
     }
 
+    
     public ProviderServiceRequestDTO acceptRequest(
             Long requestId) {
 
@@ -83,11 +101,13 @@ public class ServiceRequestService {
 
         request.setStatus(RequestStatus.ACCEPTED);
 
+        // Acesso ao banco por repository; o Spring Data implementa a operacao automaticamente.
         ServiceRequest saved = serviceRequestRepository.save(request);
 
         return toProviderDTO(saved);
     }
 
+    
     public ProviderServiceRequestDTO rejectRequest(
             Long requestId) {
 
@@ -97,9 +117,31 @@ public class ServiceRequestService {
 
         request.setStatus(RequestStatus.REJECTED);
 
+        // Acesso ao banco por repository; o Spring Data implementa a operacao automaticamente.
         ServiceRequest saved = serviceRequestRepository.save(request);
 
         return toProviderDTO(saved);
+    }
+
+    
+    public ServiceRequestResponseDTO completeRequest(
+            Long requestId) {
+
+        ServiceRequest request = serviceRequestRepository
+                .findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Solicitacao nao encontrada"));
+
+        if (request.getStatus() != RequestStatus.ACCEPTED) {
+            // Regra de validacao: quando algo esta invalido, o backend interrompe o fluxo com erro.
+            throw new RuntimeException("Somente solicitacoes aceitas podem ser concluidas");
+        }
+
+        request.setStatus(RequestStatus.COMPLETED);
+
+        // Acesso ao banco por repository; o Spring Data implementa a operacao automaticamente.
+        ServiceRequest saved = serviceRequestRepository.save(request);
+
+        return toResponseDTO(saved);
     }
 
     private ServiceRequestResponseDTO toResponseDTO(
@@ -122,6 +164,7 @@ public class ServiceRequestService {
         return new ClientServiceRequestDTO(
                 request.getId(),
                 request.getProvider().getUser().getName(),
+                request.getProvider().getId(),
                 request.getProvider().getProfession(),
                 request.getStatus(),
                 request.getCreatedAt());
@@ -138,4 +181,5 @@ public class ServiceRequestService {
                 request.getStatus(),
                 request.getCreatedAt());
     }
+
 }
